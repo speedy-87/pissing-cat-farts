@@ -20,27 +20,12 @@ app.get('/', (req, res) => {
 });
 
 // Connect to the SQLite3 database hosted on Railway
-const dbPath = '/data/leaderboard.db'; // Use the mount path for SQLite on Railway
+const dbPath = '/data/database.db'; // Correct path to your database on Railway
 const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
         console.error('Error opening SQLite database:', err);
     } else {
         console.log('Connected to the SQLite database');
-    }
-});
-
-// Create the leaderboard table if it doesn't exist
-db.run(`
-    CREATE TABLE IF NOT EXISTS scores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nickname TEXT NOT NULL,
-        score INTEGER NOT NULL
-    )
-`, (err) => {
-    if (err) {
-        console.error('Error creating the table:', err);
-    } else {
-        console.log('Leaderboard table is ready');
     }
 });
 

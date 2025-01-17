@@ -101,10 +101,10 @@ let nickname = "";
 let fartCooldown = false;
 // Save to database function
 function saveToDatabase() {
-    fetch("https://sqlite3-production-3e88.up.railway.app/api/save_score", { // Use your live backend URL here
+    fetch("https://sqlite3-production-3e88.up.railway.app/api/save_score", { // Your live backend URL here
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname, score }),
+        body: JSON.stringify({ nickname, score }), // Replace with your actual variables
     })
         .then((response) => response.json())
         .then((data) => {
@@ -119,6 +119,7 @@ function saveToDatabase() {
             alert("Failed to save score.");
         });
 }
+
 
 
 // Draw Start Screen
