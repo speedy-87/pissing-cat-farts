@@ -1,18 +1,26 @@
 require('dotenv').config(); // Load environment variables
-const sqlite3 = require('sqlite3').verbose(); // Import sqlite3 for SQLite database
+const mysql = require('mysql2'); // Import mysql2 for MySQL database
 
-// Connect to the SQLite3 database hosted on Railway
-const dbPath = '/data/database.db'; // Correct path to your database on Railway
-const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+// Connect to the MySQL database hosted on Railway
+const db = mysql.createConnection({
+    host: process.env.MYSQL_HOST,
+    port: process.env.MYSQL_PORT,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+});
+
+// Check MySQL connection
+db.connect((err) => {
     if (err) {
-        console.error('Error opening SQLite database:', err);
+        console.error('Error connecting to MySQL database:', err);
         return;
     }
-    console.log('Connected to the SQLite database');
+    console.log('Connected to the MySQL database');
 });
 
 // Query the database to fetch leaderboard data
-db.all('SELECT nickname, score FROM scores ORDER BY score DESC', [], (err, rows) => {
+db.query('SELECT nickname, score FROM scores ORDER BY score DESC', (err, rows) => {
     if (err) {
         console.error('Error querying the database:', err);
         return;
@@ -24,10 +32,10 @@ db.all('SELECT nickname, score FROM scores ORDER BY score DESC', [], (err, rows)
     });
 
     // Close the database connection after query execution
-    db.close((err) => {
+    db.end((err) => {
         if (err) {
             console.error('Error closing the database:', err);
         }
-        console.log('SQLite database connection closed');
+        console.log('MySQL database connection closed');
     });
 });

@@ -100,25 +100,26 @@ let nickname = "";
 
 let fartCooldown = false;
 // Save to database function
-function saveToDatabase() {
-    fetch("https://sqlite3-production-3e88.up.railway.app/api/save_score", { // Your live backend URL here
-        method: "POST",
+function saveToDatabase(nickname, score) {
+    fetch("https://pissing-cat-farts-production.up.railway.app/api/save_score", { 
+        method: "POST", // Make sure the method is POST
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname, score }), // Replace with your actual variables
+        body: JSON.stringify({ nickname, score }), // Pass the nickname and score from your form or variables
     })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                alert("Your score has been saved!");
-            } else {
-                alert(data.message); // Show message if the score wasn't high enough
-            }
-        })
-        .catch((error) => {
-            console.error("Error saving score:", error);
-            alert("Failed to save score.");
-        });
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.success) {
+            alert("Your score has been saved!");
+        } else {
+            alert(data.message); // Show message if the score wasn't high enough to update
+        }
+    })
+    .catch((error) => {
+        console.error("Error saving score:", error);
+        alert("Failed to save score.");
+    });
 }
+
 
 
 
@@ -260,7 +261,7 @@ function gameOver() {
     clearInterval(milkInterval);
 
     // Save the score and draw the game-over screen
-    saveToDatabase();
+    saveToDatabase(nickname, score);
     drawGameOverScreen();
 }
 

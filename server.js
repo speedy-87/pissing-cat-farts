@@ -1,6 +1,6 @@
 require('dotenv').config(); // Load environment variables
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose(); // Import sqlite3
+const mysql = require('mysql2'); // MySQL library for connecting to the MySQL database
 const cors = require('cors');
 const path = require('path'); // To resolve static files
 
@@ -19,24 +19,32 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html')); // Serve your main HTML file
 });
 
-// Connect to the SQLite3 database hosted on Railway
-const dbPath = '/data/database.db'; // Correct path to your database on Railway
-const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+// MySQL connection configuration using environment variables
+const connection = mysql.createConnection({
+    host: process.env.MYSQL_HOST,
+    port: process.env.MYSQL_PORT,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+});
+
+// Connect to MySQL
+connection.connect((err) => {
     if (err) {
-        console.error('Error opening SQLite database:', err);
-    } else {
-        console.log('Connected to the SQLite database');
+        console.error('Error connecting to MySQL database:', err);
+        return;
     }
+    console.log('Connected to the MySQL database');
 });
 
 // API endpoint to fetch leaderboard data
 app.get('/api/leaderboard', (req, res) => {
-    db.all('SELECT nickname, score FROM scores ORDER BY score DESC', [], (err, rows) => {
+    connection.query('SELECT nickname, score FROM scores ORDER BY score DESC', (err, results) => {
         if (err) {
             console.error('Error querying the database:', err);
             return res.status(500).send('Error fetching leaderboard data');
         }
-        res.json(rows); // Send the results as a JSON response
+        res.json(results); // Send the results as a JSON response
     });
 });
 
@@ -49,18 +57,18 @@ app.post('/api/save_score', (req, res) => {
     }
 
     // Check if the user already has a score
-    db.get('SELECT * FROM scores WHERE nickname = ?', [nickname], (err, row) => {
+    connection.query('SELECT * FROM scores WHERE nickname = ?', [nickname], (err, results) => {
         if (err) {
             console.error('Error querying the database:', err);
             return res.status(500).send('Error checking user score');
         }
 
-        if (row) {
+        if (results.length > 0) {
             // If the user exists and their score is higher than the stored one, update the score
-            const existingScore = row.score;
+            const existingScore = results[0].score;
 
             if (score > existingScore) {
-                db.run('UPDATE scores SET score = ? WHERE nickname = ?', [score, nickname], (err) => {
+                connection.query('UPDATE scores SET score = ? WHERE nickname = ?', [score, nickname], (err) => {
                     if (err) {
                         console.error('Error updating score:', err);
                         return res.status(500).send('Error updating score');
@@ -73,7 +81,7 @@ app.post('/api/save_score', (req, res) => {
             }
         } else {
             // If the user does not exist, insert a new score record
-            db.run('INSERT INTO scores (nickname, score) VALUES (?, ?)', [nickname, score], (err) => {
+            connection.query('INSERT INTO scores (nickname, score) VALUES (?, ?)', [nickname, score], (err) => {
                 if (err) {
                     console.error('Error inserting new score:', err);
                     return res.status(500).send('Error inserting score');
