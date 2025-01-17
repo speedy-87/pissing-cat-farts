@@ -1,11 +1,11 @@
 require('dotenv').config(); // Load environment variables
 const express = require('express');
-const mysql = require('mysql2');
+const sqlite3 = require('sqlite3').verbose(); // Import sqlite3
 const cors = require('cors');
 const path = require('path'); // To resolve static files
 
 const app = express();
-const port = process.env.PORT || 3000; // Use Heroku's dynamic port or default to 3000
+const port = process.env.PORT || 3000; // Use dynamic port or default to 3000
 
 // Enable CORS (Cross-Origin Resource Sharing)
 app.use(cors());
@@ -19,31 +19,39 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html')); // Serve your main HTML file
 });
 
-// Create a connection to the database using environment variables
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
+// Connect to the SQLite3 database hosted on Railway
+const dbPath = '/data/leaderboard.db'; // Use the mount path for SQLite on Railway
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+        console.error('Error opening SQLite database:', err);
+    } else {
+        console.log('Connected to the SQLite database');
+    }
 });
 
-// Connect to MySQL
-connection.connect(err => {
+// Create the leaderboard table if it doesn't exist
+db.run(`
+    CREATE TABLE IF NOT EXISTS scores (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nickname TEXT NOT NULL,
+        score INTEGER NOT NULL
+    )
+`, (err) => {
     if (err) {
-        console.error('Error connecting to the database:', err);
-        return;
+        console.error('Error creating the table:', err);
+    } else {
+        console.log('Leaderboard table is ready');
     }
-    console.log('Connected to the MySQL database');
 });
 
 // API endpoint to fetch leaderboard data
 app.get('/api/leaderboard', (req, res) => {
-    connection.query('SELECT nickname, score FROM scores ORDER BY score DESC', (err, results) => {
+    db.all('SELECT nickname, score FROM scores ORDER BY score DESC', [], (err, rows) => {
         if (err) {
             console.error('Error querying the database:', err);
             return res.status(500).send('Error fetching leaderboard data');
         }
-        res.json(results); // Send the results as a JSON response
+        res.json(rows); // Send the results as a JSON response
     });
 });
 
@@ -56,50 +64,42 @@ app.post('/api/save_score', (req, res) => {
     }
 
     // Check if the user already has a score
-    connection.query('SELECT * FROM scores WHERE nickname = ?', [nickname], (err, results) => {
+    db.get('SELECT * FROM scores WHERE nickname = ?', [nickname], (err, row) => {
         if (err) {
             console.error('Error querying the database:', err);
             return res.status(500).send('Error checking user score');
         }
 
-        if (results.length > 0) {
+        if (row) {
             // If the user exists and their score is higher than the stored one, update the score
-            const existingScore = results[0].score;
+            const existingScore = row.score;
 
             if (score > existingScore) {
-                connection.query(
-                    'UPDATE scores SET score = ? WHERE nickname = ?',
-                    [score, nickname],
-                    (err, updateResults) => {
-                        if (err) {
-                            console.error('Error updating score:', err);
-                            return res.status(500).send('Error updating score');
-                        }
-                        res.json({ success: true, message: 'Score updated!' });
+                db.run('UPDATE scores SET score = ? WHERE nickname = ?', [score, nickname], (err) => {
+                    if (err) {
+                        console.error('Error updating score:', err);
+                        return res.status(500).send('Error updating score');
                     }
-                );
+                    res.json({ success: true, message: 'Score updated!' });
+                });
             } else {
                 // If the new score is not higher, do nothing
                 res.json({ success: false, message: 'Score not high enough to update.' });
             }
         } else {
             // If the user does not exist, insert a new score record
-            connection.query(
-                'INSERT INTO scores (nickname, score) VALUES (?, ?)',
-                [nickname, score],
-                (err, insertResults) => {
-                    if (err) {
-                        console.error('Error inserting new score:', err);
-                        return res.status(500).send('Error inserting score');
-                    }
-                    res.json({ success: true, message: 'Score added!' });
+            db.run('INSERT INTO scores (nickname, score) VALUES (?, ?)', [nickname, score], (err) => {
+                if (err) {
+                    console.error('Error inserting new score:', err);
+                    return res.status(500).send('Error inserting score');
                 }
-            );
+                res.json({ success: true, message: 'Score added!' });
+            });
         }
     });
 });
 
 // Start the server
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
 });
