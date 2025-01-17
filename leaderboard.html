@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <title>PCF Leaderboard</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+</head>
+<body>
+    <header>
+        <div class="logo">Pissing Cat Farts</div>
+        <div class="menu-toggle" id="mobile-menu-toggle">&#9776;</div>
+        <nav>
+          <ul id="nav-list">
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/index.html#how-to-buy">How to Buy</a></li>
+            <li><a href="/index.html#roadmap">Roadmap</a></li>
+            <li><a href="/game.html">Game</a></li>
+            <li><a href="https://dexscreener.com/solana/5343mkekdxvzo1rxoc9g3caf4ds5mfwgnemw9q8wyvae" target="_blank">Chart</a></li>
+          </ul>
+        </nav>
+      </header>
+        <div class="viewportLead">
+            <div class="leaderboard">
+                <h1>Leaderboard</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nickname</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+    <script>
+        fetch('http://localhost:3000/api/leaderboard')
+            .then(response => response.json())
+            .then(data => {
+                const leaderboardTable = document.getElementById('leaderboardTable');
+                data.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <a href="https://x.com/${entry.nickname.replace('@', '')}" target="_blank" style="text-decoration: underline;">
+                                ${entry.nickname}
+                            </a>
+                        </td>
+                        <td>${entry.score}</td>
+                    `;
+                    leaderboardTable.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching leaderboard data:', error));
+    </script>        
+    <script src="https://kit.fontawesome.com/8dab3a5214.js" crossorigin="anonymous"></script>
+    <script src="nav-script.js"></script>
+</body>
+<!-- FOOTER -->
+<footer>
+    <div class="social-links">
+      <a href="https://x.com/pissingcatfarts" target="_blank">
+        <i class="fa-brands fa-x-twitter"></i>
+      </a>          
+      
+      <a href="https://t.me/pdctele" target="_blank">
+        <i class="fa-brands fa-telegram"></i>
+      </a>
+  
+      <a href="https://www.tiktok.com/@pissingcatfarts?_t=ZG-8t2i7cUYpZA&_r=1" target="_blank">
+        <i class="fa-brands fa-tiktok"></i>
+      </a>
+      <a href="https://www.instagram.com/pissingcatfarts?igsh=eDk5d3g2d3c4NDJ1" target="_blank">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+    </div>
+    <p>
+      © 2025 Pissing Cat Farts. All rights reserved. This is not financial advice; we just love cat farts!
+    </p>
+  </footer>
+</html>
