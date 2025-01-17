@@ -403,7 +403,9 @@ nav ul {
   
     .menu-toggle {
       display: block; /* Show hamburger icon on mobile */
-      left: 20%;
+      right: 5%;
+      position: absolute;
+      font-size: 2rem;
     }
   
     #nav-list {
@@ -439,56 +441,105 @@ nav ul {
 
 
   /* LEADERBOARD CSS */
-  .viewportLead {
-    height: 78vh;
+ /* Leaderboard Table Styles */
+ #leaderboardInfo{
+  height: 80vh;
+ }
+#leaderboard {
+  width: 100%;
+  max-width: 800px;
+  max-height: 75vh;
+  border-radius: 8px;
+  margin: 10px auto;
+  border-collapse: collapse;
+  background-color: #1c1c1c; /* Dark background for the table */
+  border-radius: 10px;
+  overflow: scroll;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Soft shadow for the table */
 }
-.leaderboard {
-    width: 60%;
-    margin: 10px auto 10px;
-    max-height: 70vh;
-    overflow-y: auto;
-    background-color: rgba(48, 48, 48, 0.8);
-    border-radius: 10px;
-    padding: 20px;
-}
-.leaderboard h1 {
-    text-align: center;
-    color: #f3c64b;
-}
-.leaderboard table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.leaderboard th, .leaderboard td {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #f3c64b;
-    color: #f3c64b;
-}
-#leaderboardTable a {
-    color: #f3c64b !important;
-    text-decoration: none !important;
-}
-#leaderboardTable a:hover {
-    color: #e5a828 !important;
-    text-decoration: none !important;
-}
-.leaderboard th {
-    background-color: #f3c64b;
-    color: white;
+#leaderboardTitle {
+  text-align: center;
 }
 
-@media screen and (max-width: 768px) {
-  .leaderboard {
-    width: 80%;
+#leaderboard th, #leaderboard td {
+  padding: 12px 20px;
+  text-align: left;
+  font-size: 16px;
+  color: #f0f0f0; /* Light text color */
+}
+
+#leaderboard th {
+  background-color: var(--secondary-color); /* Pink header for consistency with your site's color scheme */
+  color: #0e0e0e; /* Dark text for header */
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+#leaderboard tbody tr {
+  background-color: #2e2e2e; /* Slightly lighter dark background for rows */
+  border-bottom: 1px solid #444; /* Thin separator between rows */
+  transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+#leaderboard tbody tr:hover {
+  background-color: #3a3a3a; /* Lighter background on hover */
+}
+
+#leaderboard tbody td {
+  border-left: 1px solid #444; /* Light separator lines between cells */
+}
+
+#leaderboard td:first-child {
+  border-left: none; /* Remove left border from the first column */
+}
+
+#leaderboard .rank {
+  text-align: center;
+  font-weight: bold;
+  color: var(--secondary-color); /* Highlight rank in pink */
+}
+
+#leaderboard .nickname {
+  font-family: 'Arial', sans-serif;
+  font-weight: 600;
+}
+
+#leaderboard .score {
+  text-align: center;
+  color: var(--secondary-color); /* Score in pink to match theme */
+}
+
+#leaderboard .twitter {
+  font-size: 14px;
+  color: var(--primary-color); /* Light blue color for Twitter URL */
+  text-decoration: none;
+  word-break: break-all;
+}
+
+#leaderboard .twitter:hover {
+  color: var(--secondary-color); /* Highlight Twitter link on hover */
+  text-decoration: underline;
+}
+
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  #leaderboard th, #leaderboard td {
+    padding: 6px 8px; /* Smaller padding */
+    font-size: 12px; /* Even smaller text size */
   }
-    .controls {
-        justify-content: left;
-    }
-    .controls input, .controls button {
-        width: 250px;
-    }
-    #editor {
-        margin-top: 150px;
-    }
+
+  #leaderboard {
+    width: 95%;
+    max-width: 100%; /* Remove max-width */
+  }
+
+  #leaderboard td {
+    word-wrap: break-word; /* Ensure long text wraps */
+  }
+
+  #leaderboard th, #leaderboard td {
+    padding: 8px; /* Reduce padding further */
+  }
+
 }

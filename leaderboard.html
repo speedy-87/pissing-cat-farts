@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -28,45 +28,30 @@
             <li><a href="https://dexscreener.com/solana/5343mkekdxvzo1rxoc9g3caf4ds5mfwgnemw9q8wyvae" target="_blank">Chart</a></li>
           </ul>
         </nav>
-      </header>
-        <div class="viewportLead">
-            <div class="leaderboard">
-                <h1>Leaderboard</h1>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nickname</th>
-                            <th>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboardTable"></tbody>
-                </table>
-            </div>
-        </div>
-        
-    <script>
-        fetch('http://localhost:3000/api/leaderboard')
-            .then(response => response.json())
-            .then(data => {
-                const leaderboardTable = document.getElementById('leaderboardTable');
-                data.forEach(entry => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>
-                            <a href="https://x.com/${entry.nickname.replace('@', '')}" target="_blank" style="text-decoration: underline;">
-                                ${entry.nickname}
-                            </a>
-                        </td>
-                        <td>${entry.score}</td>
-                    `;
-                    leaderboardTable.appendChild(row);
-                });
-            })
-            .catch(error => console.error('Error fetching leaderboard data:', error));
-    </script>        
+    </header>
+    <div id="leaderboardInfo">
+      <h1 id="leaderboardTitle">Leaderboard</h1>
+
+      <!-- Leaderboard Table -->
+      <table id="leaderboard">
+          <thead>
+              <tr>
+                  <th>Rank</th>
+                  <th>Nickname</th>
+                  <th>Score</th>
+                  <th>Twitter</th>
+              </tr>
+          </thead>
+          <tbody></tbody> <!-- This is where the leaderboard rows will go -->
+      </table>
+    </div>
+    
+  
+    <script src="leaderboard.js"></script>
     <script src="https://kit.fontawesome.com/8dab3a5214.js" crossorigin="anonymous"></script>
     <script src="nav-script.js"></script>
 </body>
+
 <!-- FOOTER -->
 <footer>
     <div class="social-links">
@@ -88,5 +73,6 @@
     <p>
       © 2025 Pissing Cat Farts. All rights reserved. This is not financial advice; we just love cat farts!
     </p>
-  </footer>
+</footer>
+
 </html>

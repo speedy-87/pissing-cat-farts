@@ -10,53 +10,51 @@ const BASE_WIDTH = 360;
 const BASE_HEIGHT = 640;
 let scale = 1; // Scaling factor for responsiveness
 
-// Load cat and milk images
+// Load images
 const catImg = new Image();
-catImg.src = "./img/pcf-new.png"; // Replace with actual cat image path
+catImg.src = "./img/pcf-new.png";
 
 const catFartImg = new Image();
-catFartImg.src = "./img/pcf-fart-new.png"; // Replace with farting cat image path
+catFartImg.src = "./img/pcf-fart-new.png";
 
 const milkImg = new Image();
-milkImg.src = "./img/milk.png"; // Replace with actual milk image path
+milkImg.src = "./img/milk.png";
 
-// Load fart sound
-const fartSound = new Audio("./audio/fart.wav"); 
+const pipeImg = new Image();
+pipeImg.src = "./img/cat-tree2.png";
 
-const flushSound = new Audio("./audio/toilet-flushed.mp3"); 
-const slurpSound = new Audio("./audio/cartoon-slurp.mp3"); 
+// Load sounds
+const fartSound = new Audio("./audio/fart.wav");
+const flushSound = new Audio("./audio/toilet-flushed.mp3");
+const slurpSound = new Audio("./audio/cartoon-slurp.mp3");
 
 // Offscreen canvas for pixel-perfect collision detection
 const offscreenCanvas = document.createElement("canvas");
 const offscreenCtx = offscreenCanvas.getContext("2d");
 
-// Resize canvas to fit the screen while maintaining the aspect ratio
+// Resize canvas to fit the screen while maintaining aspect ratio
 function resizeCanvas() {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
     const maxHeight = 625; // Maximum height to avoid excessive scaling
-
     if (screenWidth / screenHeight > BASE_WIDTH / BASE_HEIGHT) {
-        canvas.height = Math.min(screenHeight, maxHeight); // Ensure height doesn't exceed maxHeight
+        canvas.height = Math.min(screenHeight, maxHeight);
         canvas.width = (BASE_WIDTH / BASE_HEIGHT) * canvas.height;
     } else {
-        canvas.width = screenWidth * 0.95; // Reduce width slightly for better fit
+        canvas.width = screenWidth * 0.95;
         canvas.height = (BASE_HEIGHT / BASE_WIDTH) * canvas.width;
     }
 
-    scale = canvas.width / BASE_WIDTH; // Scaling factor based on width
+    scale = canvas.width / BASE_WIDTH;
 }
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas); // Update on resize
 
-// Load pipe image (only one image is now used)
-const pipeImg = new Image();
-pipeImg.src = "./img/cat-tree2.png"; // Path to the selected pipe image
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 // Track image load status
 let imagesLoaded = 0;
-const totalImages = 4; // Including cat and milk images
+const totalImages = 4;
 
 function imageLoaded() {
     imagesLoaded++;
@@ -65,12 +63,10 @@ function imageLoaded() {
     }
 }
 
-// Attach image load event listeners
 catImg.onload = imageLoaded;
 catFartImg.onload = imageLoaded;
 milkImg.onload = imageLoaded;
-pipeImg.onload = imageLoaded; // Load pipe image
-fartSound.preload = 'auto'; // Preload the sound
+pipeImg.onload = imageLoaded;
 
 // Game variables
 let catY = canvas.height / 2;
@@ -87,56 +83,28 @@ let gap = 150 * scale;
 let pipeSpeed = 3 * scale;
 const scorePadding = 10 * scale;
 
-// Milk variable
 let milk = null; // Store only one milk
 let milkWidth = 50 * scale;
 
-// Add pipes at intervals
 let pipeInterval;
 let milkInterval;
 
 let isFarting = false;
 let nickname = "";
-
 let fartCooldown = false;
-// Save to database function
-function saveToDatabase(nickname, score) {
-    fetch("https://pissing-cat-farts-production.up.railway.app/api/save_score", { 
-        method: "POST", // Make sure the method is POST
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nickname, score }), // Pass the nickname and score from your form or variables
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.success) {
-            alert("Your score has been saved!");
-        } else {
-            alert(data.message); // Show message if the score wasn't high enough to update
-        }
-    })
-    .catch((error) => {
-        console.error("Error saving score:", error);
-        alert("Failed to save score.");
-    });
-}
-
-
-
 
 // Draw Start Screen
-function drawStartScreen() { 
+function drawStartScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     ctx.fillStyle = "#f3c64b";
     ctx.font = `bold ${30 * scale}px Arial`;
     ctx.textAlign = "center";
     
-    // Fill the text in the same position
     ctx.fillText("Pissing Cat Farts", canvas.width / 2, canvas.height / 2 - 50 * scale);
     
-    restartButton.style.display = "none"; // hide button
+    restartButton.style.display = "none"; 
     startButton.style.display = "block";
-    
     leaderboardButton.style.display = "block"; 
     nicknameInput.style.display = "block";
 }
@@ -150,9 +118,9 @@ function drawGameOverScreen() {
     ctx.fillStyle = "black";
     ctx.font = `${20 * scale}px Arial`;
     ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2);
-    ctx.fillText(`Name: ${nickname}`, canvas.width / 2, canvas.height / 2 - -25 * scale);
+    ctx.fillText(`Name: ${nickname}`, canvas.width / 2, canvas.height / 2 + 25 * scale);
     startButton.style.display = "none";
-    restartButton.style.display = "block"; // Show button
+    restartButton.style.display = "block"; 
     leaderboardButton.style.display = "block"; 
 }
 
@@ -168,70 +136,54 @@ function gameLoop() {
         const catSize = 60 * scale;
         const currentCatImg = isFarting ? catFartImg : catImg;
         if (isFarting && !fartCooldown) {
-            const fartClone = fartSound.cloneNode(); // Create a new instance of the sound
-            fartClone.play();                       // Play the cloned sound
-            fartCooldown = true;                    // Set cooldown to prevent rapid playback
-            setTimeout(() => {
-                fartCooldown = false;              // Reset cooldown after 500ms
-            }, 200);                               // Adjust this value if needed
-        }    
+            const fartClone = fartSound.cloneNode();
+            fartClone.play();
+            fartCooldown = true;
+            setTimeout(() => fartCooldown = false, 200);
+        }
 
-        // Draw the cat
         ctx.drawImage(currentCatImg, catX, catY, catSize, catSize);
 
         // Draw and update pipes
         pipes.forEach((pipe, index) => {
             pipe.x -= pipeSpeed;
-        
-            // Draw the top pipe (flipped vertically)
-            ctx.save(); // Save the current canvas state
-            ctx.scale(1, -1); // Flip the canvas vertically
-            ctx.drawImage(pipeImg, pipe.x, -pipe.top, pipe.width, pipe.top); // Negative y-coordinate for flip
-            ctx.restore(); // Restore the canvas state
-        
-            // Draw the bottom pipe (regular)
+
+            ctx.save();
+            ctx.scale(1, -1);
+            ctx.drawImage(pipeImg, pipe.x, -pipe.top, pipe.width, pipe.top);
+            ctx.restore();
+
             ctx.drawImage(pipeImg, pipe.x, pipe.bottom, pipe.width, canvas.height - pipe.bottom);
-        
-            // Check collision with top pipe
-            if (
-                catX < pipe.x + pipe.width &&
-                catX + catSize > pipe.x &&
-                (catY < pipe.top || catY + catSize > pipe.bottom)
-            ) {
+
+            // Collision detection
+            if (catX < pipe.x + pipe.width && catX + catSize > pipe.x && (catY < pipe.top || catY + catSize > pipe.bottom)) {
                 flushSound.play();
                 gameOver();
             }
-        
+
             // Remove pipes that are out of the screen
             if (pipe.x + pipe.width < 0) {
                 pipes.splice(index, 1);
                 score++;
             }
         });
-        
 
         // Draw and update milk
         if (milk !== null) {
-            milk.x -= pipeSpeed; // Move milk towards the cat
+            milk.x -= pipeSpeed;
             ctx.drawImage(milkImg, milk.x, milk.y, milkWidth, milkWidth);
 
-            // Check for collision with milk
-            if (
-                catX < milk.x + milkWidth &&
-                catX + catSize > milk.x &&
-                catY < milk.y + milkWidth &&
-                catY + catSize > milk.y
-            ) {
+            // Collision detection with milk
+            if (catX < milk.x + milkWidth && catX + catSize > milk.x && catY < milk.y + milkWidth && catY + catSize > milk.y) {
                 slurpSound.play();
-                milk = null; // Remove milk
-                score++; // Increase score
-            }
-            else if (milk.x + milkWidth < 0) {
-                milk = null; // Remove missed milk
+                milk = null;
+                score++;
+            } else if (milk.x + milkWidth < 0) {
+                milk = null;
             }
         }
 
-        // Check for game over (cat out of screen)
+        // Game over check
         if (catY + catSize > canvas.height || catY < 0) {
             flushSound.play();
             gameOver();
@@ -246,23 +198,91 @@ function gameLoop() {
 
         requestAnimationFrame(gameLoop);
     } else {
-        // Ensure the game-over screen is drawn once
         drawGameOverScreen();
     }
 }
 
+// Game over handling
 function gameOver() {
-    if (isGameOver) return; // Prevent multiple calls to gameOver
+    if (isGameOver) return;
 
     isGameOver = true;
-
-    // Stop intervals
     clearInterval(pipeInterval);
     clearInterval(milkInterval);
 
-    // Save the score and draw the game-over screen
-    saveToDatabase(nickname, score);
+    submitScore();
     drawGameOverScreen();
+}
+
+function submitScore() {
+    const nicknameInput = document.querySelector("#nickname-input");  // Target the correct nickname input
+    const playerScore = score;  // Use the game score directly
+    const nickname = nicknameInput.value.trim();
+    
+    if (!nickname || isNaN(playerScore)) {
+        alert("Please enter a valid nickname and ensure the game has ended.");
+        return;
+    }
+
+    // Remove '@' from the beginning of the nickname before creating the Twitter URL
+    const twitterURL = `https://www.x.com/${nickname.replace(/^@/, '')}`;
+    const scoreData = { nickname: `${nickname}`, score: playerScore, twitter: twitterURL };
+
+    console.log("Submitting score:", scoreData); // Debugging line
+
+    const url = 'https://api.sheety.co/fd10818c1eae04caf0980564586d4c52/pcfLeaderboard/sheet1';
+
+    // First, load the existing leaderboard
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const leaderboard = data.sheet1;
+            let existingEntry = leaderboard.find(entry => entry.nickname === nickname);
+
+            if (existingEntry) {
+                // If the nickname exists, check if the new score is higher
+                if (playerScore > existingEntry.score) {
+                    // Update the score if the new score is higher
+                    existingEntry.score = playerScore;
+
+                    // Update the leaderboard entry in the database
+                    return fetch(url, {
+                        method: 'PUT', // Use PUT to update the existing entry
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer YOUR_API_KEY" // Replace with actual API key
+                        },
+                        body: JSON.stringify({ sheet1: existingEntry })
+                    });
+                } else {
+                    alert("Your score is not higher than the current score. No update made.");
+                    
+                }
+            } else {
+                // If the nickname doesn't exist, add it to the leaderboard
+                return fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer YOUR_API_KEY" // Replace with actual API key
+                    },
+                    body: JSON.stringify({ sheet1: scoreData })
+                });
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(error => { throw new Error(error.message || "Failed to submit score") });
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log("Score submitted/updated successfully!", json);
+            alert("Score submitted/updated successfully!");
+        })
+        .catch((error) => {
+            console.error("Error submitting/updating score:", error);
+        });
 }
 
 // Start game
@@ -290,62 +310,46 @@ function startGame() {
     milk = null;
 
     // Start intervals for pipes and milk
-    const MIN_PIPE_HEIGHT = 50 * scale;  // Minimum height for pipe
-    const MAX_PIPE_HEIGHT = canvas.height - gap - 50 * scale; // Maximum height for pipe
+    const MIN_PIPE_HEIGHT = 50 * scale;
+    const MAX_PIPE_HEIGHT = canvas.height - gap - 50 * scale;
 
     pipeInterval = setInterval(() => {
         const randomTopHeight = Math.random() * (MAX_PIPE_HEIGHT - MIN_PIPE_HEIGHT) + MIN_PIPE_HEIGHT;
-        pipes.push({
-            x: canvas.width,
-            top: randomTopHeight,         // Top height for top pipe
-            bottom: randomTopHeight + gap, // Position for bottom pipe's top edge
-            width: pipeWidth,            // Fixed width for the pipes
-        });
-    }, 2000); // Adjust pipe spawn interval if needed
+        pipes.push({ x: canvas.width, top: randomTopHeight, bottom: randomTopHeight + gap, width: pipeWidth });
+    }, 2000);
 
     milkInterval = setInterval(() => {
         if (milk === null && pipes.length > 0) {
-            const pipe = pipes[pipes.length - 1]; // Get the latest pipe
-
-            // Randomize milk spawn in the gap between pipes
+            const pipe = pipes[pipes.length - 1];
             const milkY = pipe.top + Math.random() * (gap - milkWidth);
-            milk = {
-                x: pipe.x + pipeWidth + Math.random() * 100 * scale, // Slight offset from the pipe
-                y: milkY, // Spawn in the gap
-            };
+            milk = { x: pipe.x + pipeWidth + Math.random() * 100 * scale, y: milkY };
         }
     }, 2000);
 
-    // Start the game loop
     gameLoop();
 }
 
-
 function restartGame() {
-    // Reset game state variables
     isGameStarted = false;
     isGameOver = false;
-    score = 0; // Reset score
+    score = 0;
 
-    // Show necessary UI elements
     startButton.style.display = "block";
     restartButton.style.display = "none";
     leaderboardButton.style.display = "block";
     nicknameInput.style.display = "block";
-    nicknameInput.value = ""; // Clear the nickname input
+    nicknameInput.value = ""; 
 
-    // Draw the start screen
     drawStartScreen();
 }
 
+// Event listeners for interactions
 canvas.addEventListener("click", () => {
     if (isGameStarted && !isGameOver) {
         catVelocity = -5 * scale;
         isFarting = true;
 
-        setTimeout(() => {
-            isFarting = false;
-        }, 200);
+        setTimeout(() => isFarting = false, 200);
     }
 });
 
@@ -355,9 +359,7 @@ canvas.addEventListener("touchend", (e) => {
         catVelocity = -5 * scale;
         isFarting = true;
 
-        setTimeout(() => {
-            isFarting = false;
-        }, 200);
+        setTimeout(() => isFarting = false, 200);
     }
 });
 
@@ -367,10 +369,8 @@ startButton.addEventListener("click", () => {
     }
 });
 
-restartButton.addEventListener("click", () => {
-    restartGame();
-});
+restartButton.addEventListener("click", () => restartGame());
 
 leaderboardButton.addEventListener("click", () => {
-    window.location.href = "leaderboard.html"; // Adjust this URL to your leaderboard page
+    window.location.href = "leaderboard.html"; 
 });
