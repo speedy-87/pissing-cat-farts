@@ -326,8 +326,12 @@ function startGame() {
         }
     }, 2000);
 
-    gameLoop();
+    // Delay game loop start by 3 seconds
+    setTimeout(() => {
+        gameLoop();
+    }, 1000);  // 3000 milliseconds (3 seconds) delay before game loop starts
 }
+
 
 function restartGame() {
     isGameStarted = false;
@@ -338,14 +342,27 @@ function restartGame() {
     restartButton.style.display = "none";
     leaderboardButton.style.display = "block";
     nicknameInput.style.display = "block";
-    nicknameInput.value = ""; 
+
+    // Retrieve the nickname from localStorage (if it exists)
+    const savedNickname = localStorage.getItem("nickname");
+    if (savedNickname) {
+        nicknameInput.value = savedNickname;  // Set the nickname in the input field
+    }
 
     drawStartScreen();
+}
+
+function saveNickname() {
+    const nickname = nicknameInput.value.trim();
+    if (nickname) {
+        localStorage.setItem("nickname", nickname);  // Save nickname to localStorage
+    }
 }
 
 // Event listeners for interactions
 canvas.addEventListener("click", () => {
     if (isGameStarted && !isGameOver) {
+        saveNickname();
         catVelocity = -5 * scale;
         isFarting = true;
 
